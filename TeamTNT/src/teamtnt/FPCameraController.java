@@ -1,3 +1,5 @@
+package teamtnt;
+
 /***************************************************************
 * file: FPCameraController.java
 * authors: Kenneth L. Ung, Dongri Zhu, Rafael Soto-Salinas

@@ -1,3 +1,5 @@
+package teamtnt;
+
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -42,16 +44,16 @@ public class Chunk {
             for(int j = 0; j < CHUNK_SIZE; j++) {
                 for(int k = 0; k < CHUNK_SIZE; k++) {
                     if(r.nextFloat() > 0.7f) { 
-                        Blocks[i][j][k] = new Block(Block.BlockType.BlockType_Grass);
+                        Blocks[i][j][k] = new Block(Block.BlockType.BlockType_Grass); //Grass
                     }
                     else if(r.nextFloat() > 0.4f){
-                        Blocks[i][j][k] = new Block(Block.BlockType.BlockType_Dirt);
+                        Blocks[i][j][k] = new Block(Block.BlockType.BlockType_Grass); //Sand?
                     }
                     else if (r.nextFloat() > 0.2f) {
-                        Blocks[i][j][k] = new Block(Block.BlockType.BlockType_Water);
+                        Blocks[i][j][k] = new Block(Block.BlockType.BlockType_Grass); //Water
                     }
                     else {
-                        Blocks[i][j][k] = new Block(Block.BlockType.BlockType_Stone);
+                        Blocks[i][j][k] = new Block(Block.BlockType.BlockType_Grass);
                     }
                 }
             }
@@ -152,35 +154,57 @@ public class Chunk {
     }
     
     private float[] getCubeColor(Block block) {
-        switch(block.GetID()) {
-            case 1:
-                return new float[] {0, 1, 0};
-            case 2:
-                return new float[] {1, 0.5f, 0};
-            case 3:
-                return new float[] {0, 0f, 1f};
-        }
-        return new float[] {1, 1, 1};
+        return new float[] {1,1,1};
     }
     
     public static float[] createTexCube(float x, float y, Block block) {
         float offset = (1024f/16)/1024f;
-        switch(block.GetID()) {
-            case 0: //Grass
+        switch(block.GetID()) { //Remember Camera is flipped.
+            case 0: 
                 return new float[] {
-                    //Bottom of Cube
-                    x + offset * 3, y + offset * 1,
-                    x + offset * 2, y + offset * 1,
-                    x + offset * 3, y + offset * 0,
-                    x + offset * 2, y + offset * 0,
-                    //Top of Cube
-                    x + offset * 3, y + offset * 10,
-                    x + offset * 2, y + offset * 10,
-                    x + offset * 2, y + offset * 9,
-                    x + offset * 3, y + offset * 9,
-                    //Front of Cube
+                    // Bottom ? == Top
+                    x + (offset * 3), y + (offset * 10),
+                    x + (offset * 2), y + (offset * 10),
+                    x + (offset * 2), y + (offset * 9),
+                    x + (offset * 3), y + (offset * 9),
                     
-                }
+                    //Top ? == Bottom
+                    x + (offset * 3), y + (offset * 1),
+                    x + (offset * 2), y + (offset * 1),
+                    x + (offset * 2), y + (offset * 0),
+                    x + (offset * 3), y + (offset * 0),
+                    
+                    // Front == Back
+                    x + (offset * 3), y + (offset * 0), 
+                    x + (offset * 4), y + (offset * 0), 
+                    x + (offset * 4), y + (offset * 1),
+                    x + (offset * 3), y + (offset * 1),
+                    
+                    //Back == Front
+                    x + (offset * 4), y + (offset * 1),
+                    x + (offset * 3), y + (offset * 1),
+                    x + (offset * 3), y + (offset * 0),
+                    x + (offset * 4), y + (offset * 0),
+                    
+                    //Left == Right
+                    x + (offset * 3), y + (offset * 0),
+                    x + (offset * 4), y + (offset * 0),
+                    x + (offset * 4), y + (offset * 1),
+                    x + (offset * 3), y + (offset * 1),
+                    
+                    //Right == Left
+                    
+                    x + (offset * 3), y + (offset * 0),
+                    x + (offset * 4), y + (offset * 0),
+                    x + (offset * 4), y + (offset * 1),
+                    x + (offset * 3), y + (offset * 1)
+                    
+                };
+            case 1: //Sand
+                return new float[] {
+                    
+                };
         }
+        return new float[] {1,1,1};
     }
 }

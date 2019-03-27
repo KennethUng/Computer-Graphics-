@@ -1,3 +1,5 @@
+package teamtnt;
+
 /***************************************************************
 * file: SemesterProject.java
 * authors: Kenneth L. Ung, Dongri Zhu, Rafael Soto-Salinas
