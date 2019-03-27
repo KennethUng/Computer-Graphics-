@@ -2,3 +2,6 @@
 /TeamTNT/build.xml
 /TeamTNT/manifest.mf
 /TeamTNT/nbproject/*
+.DS_Store
+/TeamTNT/build/
+.gitignore
