@@ -43,17 +43,23 @@ public class Chunk {
         for(int i = 0; i < CHUNK_SIZE; i++) {
             for(int j = 0; j < CHUNK_SIZE; j++) {
                 for(int k = 0; k < CHUNK_SIZE; k++) {
-                    if(r.nextFloat() > 0.7f) { 
+                    if(r.nextFloat() > 0.9f) { 
                         Blocks[i][j][k] = new Block(Block.BlockType.BlockType_Grass); //Grass
                     }
-                    else if(r.nextFloat() > 0.4f){
+                    else if(r.nextFloat() > 0.7f){
                         Blocks[i][j][k] = new Block(Block.BlockType.BlockType_Sand); //Sand?
                     }
-                    else if (r.nextFloat() > 0.2f) {
-                        Blocks[i][j][k] = new Block(Block.BlockType.BlockType_Grass); //Water
+                    else if (r.nextFloat() > 0.5f) {
+                        Blocks[i][j][k] = new Block(Block.BlockType.BlockType_Water); //Water
+                    }
+                    else if(r.nextFloat() > 0.3f) {
+                        Blocks[i][j][k] = new Block(Block.BlockType.BlockType_Stone);
+                    }
+                    else if(r.nextFloat() > 0.1f) {
+                        Blocks[i][j][k] = new Block(Block.BlockType.BlockType_Bedrock);
                     }
                     else {
-                        Blocks[i][j][k] = new Block(Block.BlockType.BlockType_Grass);
+                        Blocks[i][j][k] = new Block(Block.BlockType.BlockType_Dirt);
                     }
                 }
             }
@@ -238,6 +244,155 @@ public class Chunk {
                     x + (offset * 3), y + (offset * 2),
                     x + (offset * 2), y + (offset * 2)                    
                 };
+            case 2: //Water
+                return new float[] {
+                    //Bottom
+                    x + (offset * 2), y + (offset * 12),
+                    x + (offset * 1), y + (offset * 12),
+                    x + (offset * 1), y + (offset * 11),
+                    x + (offset * 2), y + (offset * 11),
+                    //Top
+                    x + (offset * 2), y + (offset * 12),
+                    x + (offset * 1), y + (offset * 12),
+                    x + (offset * 1), y + (offset * 11),
+                    x + (offset * 2), y + (offset * 11),
+                    //Front
+                    x + (offset * 1), y + (offset * 11),
+                    x + (offset * 2), y + (offset * 11),
+                    x + (offset * 2), y + (offset * 12),
+                    x + (offset * 1), y + (offset * 12),
+                    // Back
+                    x + (offset * 2), y + (offset * 12),
+                    x + (offset * 1), y + (offset * 12),
+                    x + (offset * 1), y + (offset * 11),
+                    x + (offset * 2), y + (offset * 11),  
+                    // Left
+                    x + (offset * 1), y + (offset * 11),
+                    x + (offset * 2), y + (offset * 11),
+                    x + (offset * 2), y + (offset * 12),
+                    x + (offset * 1), y + (offset * 12),
+                    //Right
+                    x + (offset * 1), y + (offset * 11),
+                    x + (offset * 2), y + (offset * 11),
+                    x + (offset * 2), y + (offset * 12),
+                    x + (offset * 1), y + (offset * 12)                    
+                };
+            case 3: // Dirt
+                return new float[] {
+                    // Bottom --> Order goes Right, Left, Left, Right, Lowest --> Highest
+                    x + (offset * 3), y + (offset * 1),
+                    x + (offset * 2), y + (offset * 1),
+                    x + (offset * 2), y + (offset * 0),
+                    x + (offset * 3), y + (offset * 0),
+                    
+                    //Top
+                    x + (offset * 3), y + (offset * 1),
+                    x + (offset * 2), y + (offset * 1),
+                    x + (offset * 2), y + (offset * 0),
+                    x + (offset * 3), y + (offset * 0),
+                    
+                    // Front , now working left to right, lowest to highest
+                    x + (offset * 2), y + (offset * 0),
+                    x + (offset * 3), y + (offset * 0),
+                    x + (offset * 3), y + (offset * 1),
+                    x + (offset * 2), y + (offset * 1),
+                    
+                    // Back , Same concept as Bottom and Top
+                    x + (offset * 3), y + (offset * 1),
+                    x + (offset * 2), y + (offset * 1),
+                    x + (offset * 2), y + (offset * 0),
+                    x + (offset * 3), y + (offset * 0),    
+                    
+                    //Left Back to concept of Front
+                    x + (offset * 2), y + (offset * 0),
+                    x + (offset * 3), y + (offset * 0),
+                    x + (offset * 3), y + (offset * 1),
+                    x + (offset * 2), y + (offset * 1),
+                    
+                    //Right same concept
+                    x + (offset * 2), y + (offset * 0),
+                    x + (offset * 3), y + (offset * 0),
+                    x + (offset * 3), y + (offset * 1),
+                    x + (offset * 2), y + (offset * 1)   
+                    
+                };
+            case 4: //Stone
+                 return new float[] {
+                    // Bottom --> Order goes Right, Left, Left, Right, Lowest --> Highest
+                    x + (offset * 1), y + (offset * 2),
+                    x + (offset * 0), y + (offset * 2),
+                    x + (offset * 0), y + (offset * 1),
+                    x + (offset * 1), y + (offset * 1),
+                    
+                    //Top
+                    x + (offset * 1), y + (offset * 2),
+                    x + (offset * 0), y + (offset * 2),
+                    x + (offset * 0), y + (offset * 1),
+                    x + (offset * 1), y + (offset * 1),
+                    
+                    // Front , now working left to right, lowest to highest
+                    x + (offset * 0), y + (offset * 1),
+                    x + (offset * 1), y + (offset * 1),
+                    x + (offset * 1), y + (offset * 2),
+                    x + (offset * 0), y + (offset * 2),
+                    
+                    // Back , Same concept as Bottom and Top
+                    x + (offset * 1), y + (offset * 2),
+                    x + (offset * 0), y + (offset * 2),
+                    x + (offset * 0), y + (offset * 1),
+                    x + (offset * 1), y + (offset * 1),  
+                    
+                    //Left Back to concept of Front
+                    x + (offset * 0), y + (offset * 1),
+                    x + (offset * 1), y + (offset * 1),
+                    x + (offset * 1), y + (offset * 2),
+                    x + (offset * 0), y + (offset * 2),
+                    
+                    //Right same concept
+                    x + (offset * 0), y + (offset * 1),
+                    x + (offset * 1), y + (offset * 1),
+                    x + (offset * 1), y + (offset * 2),
+                    x + (offset * 0), y + (offset * 2) 
+                };
+            case 5: //Bed Rock
+                 return new float[] {
+                    // Bottom --> Order goes Right, Left, Left, Right, Lowest --> Highest
+                    x + (offset * 2), y + (offset * 2),
+                    x + (offset * 1), y + (offset * 2),
+                    x + (offset * 1), y + (offset * 1),
+                    x + (offset * 2), y + (offset * 1),
+                    
+                    //Top
+                    x + (offset * 2), y + (offset * 2),
+                    x + (offset * 1), y + (offset * 2),
+                    x + (offset * 1), y + (offset * 1),
+                    x + (offset * 2), y + (offset * 1),
+                    
+                    // Front , now working left to right, lowest to highest
+                    x + (offset * 1), y + (offset * 1),
+                    x + (offset * 2), y + (offset * 1),
+                    x + (offset * 2), y + (offset * 2),
+                    x + (offset * 1), y + (offset * 2),
+                    
+                    // Back , Same concept as Bottom and Top
+                    x + (offset * 2), y + (offset * 2),
+                    x + (offset * 1), y + (offset * 2),
+                    x + (offset * 1), y + (offset * 1),
+                    x + (offset * 2), y + (offset * 1), 
+                    
+                    //Left Back to concept of Front
+                    x + (offset * 1), y + (offset * 1),
+                    x + (offset * 2), y + (offset * 1),
+                    x + (offset * 2), y + (offset * 2),
+                    x + (offset * 1), y + (offset * 2),
+                    
+                    //Right same concept
+                    x + (offset * 1), y + (offset * 1),
+                    x + (offset * 2), y + (offset * 1),
+                    x + (offset * 2), y + (offset * 2),
+                    x + (offset * 1), y + (offset * 2)
+                };                      
+                
         }
         return new float[] {1,1,1};
     }
