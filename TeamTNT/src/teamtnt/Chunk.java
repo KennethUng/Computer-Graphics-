@@ -47,7 +47,7 @@ public class Chunk {
                         Blocks[i][j][k] = new Block(Block.BlockType.BlockType_Grass); //Grass
                     }
                     else if(r.nextFloat() > 0.4f){
-                        Blocks[i][j][k] = new Block(Block.BlockType.BlockType_Grass); //Sand?
+                        Blocks[i][j][k] = new Block(Block.BlockType.BlockType_Sand); //Sand?
                     }
                     else if (r.nextFloat() > 0.2f) {
                         Blocks[i][j][k] = new Block(Block.BlockType.BlockType_Grass); //Water
@@ -163,20 +163,20 @@ public class Chunk {
             case 0: 
                 return new float[] {
                     // Bottom ? == Top
-                    x + (offset * 3), y + (offset * 10),
-                    x + (offset * 2), y + (offset * 10),
-                    x + (offset * 2), y + (offset * 9),
-                    x + (offset * 3), y + (offset * 9),
+                    x + (offset * 3), y + (offset * 10), //Right Edge
+                    x + (offset * 2), y + (offset * 10), // Left Edge
+                    x + (offset * 2), y + (offset * 9), // Left edge
+                    x + (offset * 3), y + (offset * 9), // Right Edge
                     
                     //Top ? == Bottom
-                    x + (offset * 3), y + (offset * 1),
+                    x + (offset * 3), y + (offset * 1), //Right
                     x + (offset * 2), y + (offset * 1),
                     x + (offset * 2), y + (offset * 0),
                     x + (offset * 3), y + (offset * 0),
                     
                     // Front == Back
-                    x + (offset * 3), y + (offset * 0), 
-                    x + (offset * 4), y + (offset * 0), 
+                    x + (offset * 3), y + (offset * 0), //Left
+                    x + (offset * 4), y + (offset * 0), // Right
                     x + (offset * 4), y + (offset * 1),
                     x + (offset * 3), y + (offset * 1),
                     
@@ -202,7 +202,41 @@ public class Chunk {
                 };
             case 1: //Sand
                 return new float[] {
+                    // Bottom --> Order goes Right, Left, Left, Right, Lowest --> Highest
+                    x + (offset * 3), y + (offset * 2),
+                    x + (offset * 2), y + (offset * 2),
+                    x + (offset * 2), y + (offset * 1),
+                    x + (offset * 3), y + (offset * 1),
                     
+                    //Top
+                    x + (offset * 3), y + (offset * 2),
+                    x + (offset * 2), y + (offset * 2),
+                    x + (offset * 2), y + (offset * 1),
+                    x + (offset * 3), y + (offset * 1),
+                    
+                    // Front , now working left to right, lowest to highest
+                    x + (offset * 2), y + (offset * 1),
+                    x + (offset * 3), y + (offset * 1),
+                    x + (offset * 3), y + (offset * 2),
+                    x + (offset * 2), y + (offset * 2),
+                    
+                    // Back , Same concept as Bottom and Top
+                    x + (offset * 3), y + (offset * 2),
+                    x + (offset * 2), y + (offset * 2),
+                    x + (offset * 2), y + (offset * 1),
+                    x + (offset * 3), y + (offset * 1),    
+                    
+                    //Left Back to concept of Front
+                    x + (offset * 2), y + (offset * 1),
+                    x + (offset * 3), y + (offset * 1),
+                    x + (offset * 3), y + (offset * 2),
+                    x + (offset * 2), y + (offset * 2),
+                    
+                    //Right same concept
+                    x + (offset * 2), y + (offset * 1),
+                    x + (offset * 3), y + (offset * 1),
+                    x + (offset * 3), y + (offset * 2),
+                    x + (offset * 2), y + (offset * 2)                    
                 };
         }
         return new float[] {1,1,1};
