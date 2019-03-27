@@ -87,6 +87,8 @@ public class Chunk {
     }
     
     public void rebuildMesh(float startX, float startY, float startZ) {
+        SimplexNoise generator = new SimplexNoise(30, 0.5, 3);
+        //float height = (startY + (int)(100 * generator.getNoise(0, 0, 0)) * CUBE_LENGTH);
         VBOTextureHandle = glGenBuffers();
         VBOColorHandle = glGenBuffers();
         VBOVertexHandle = glGenBuffers();
