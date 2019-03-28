@@ -1,19 +1,13 @@
 package teamtnt;
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
-/**
- *
- * @author kennethung
- */
 import org.newdawn.slick.opengl.Texture;
 import org.newdawn.slick.opengl.TextureLoader;
 import org.newdawn.slick.util.ResourceLoader;
 import java.nio.FloatBuffer;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 import org.lwjgl.BufferUtils;
 import static org.lwjgl.opengl.GL11.*;
@@ -87,7 +81,7 @@ public class Chunk {
     }
     
     public void rebuildMesh(float startX, float startY, float startZ) {
-        SimplexNoise generator = new SimplexNoise(30, 0.5, 3);
+        SimplexNoise generator = new SimplexNoise(30, 0.5f, 10);
         VBOTextureHandle = glGenBuffers();
         VBOColorHandle = glGenBuffers();
         VBOVertexHandle = glGenBuffers();
@@ -97,7 +91,20 @@ public class Chunk {
         for(float x = 0; x < CHUNK_SIZE; x++) {
             for(float z = 0; z < CHUNK_SIZE; z++) {
                 float y = 0;
-                float height = (startY + (int)(CHUNK_SIZE * generator.getNoise((int)x,(int)y,(int)z)));
+                Integer array[] = {0,1,2,3,4,5};
+                List<Integer> l = Arrays.asList(array);
+                Collections.shuffle(l);
+                    int ran = r.nextInt(((int)x) + 1)  ;
+                
+                float noise = (float)generator.getNoise(((int)x), (int)array[0], (int)z);
+                if(noise < 0){
+                    noise = noise * -1;
+                }
+                float height = (float) (startY + (int)(CHUNK_SIZE *noise));             
+                //float y = 0;
+                //int i = (int)(startX + x * ((CHUNK_SIZE - startX)/640));
+                //System.out.println(CHUNK_SIZE * generator.getNoise((int) x, (int) y, (int)z));
+                //float height = (startY + (int)(CHUNK_SIZE * generator.getNoise((int) x,(int)y,(int)z)));
                 for( ; y <= height; y++) {
                     VertexTextureData.put(createTexCube((float) 0, (float) 0, Blocks[(int)x][(int)y][(int)z]));
                     VertexPositionData.put(createCube((float)(startX + x * CUBE_LENGTH), (float)(y * CUBE_LENGTH + ((int)(CHUNK_SIZE*.8))), (float) (startZ + z * CUBE_LENGTH)));
