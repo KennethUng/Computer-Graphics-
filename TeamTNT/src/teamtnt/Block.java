@@ -1,3 +1,15 @@
+/***************************************************************
+* file: Block.java
+* authors: Kenneth L. Ung, Dongri Zhu, Rafael Soto-Salinas
+* class: CS 4450.01 – Computer Graphics
+*
+* assignment: semester project
+* date last modified: 3/28/2019
+*
+* purpose: Holds the definition of what a Block is. It enumerates the block into different types.
+* We currently are using only 6 basic types. Will be expanded to add more.
+*
+****************************************************************/ 
 package teamtnt;
 
 /*

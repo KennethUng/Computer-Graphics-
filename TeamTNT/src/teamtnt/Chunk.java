@@ -1,3 +1,16 @@
+/***************************************************************
+* file: Chunk.java
+* authors: Kenneth L. Ung, Dongri Zhu, Rafael Soto-Salinas
+* class: CS 4450.01 – Computer Graphics
+*
+* assignment: semester project
+* date last modified: 3/11/2019
+*
+* purpose: Generates a chunk of blocks of size 30 x 30. New render method is in here and 
+* all of the drawing is done in this class. We also use this class in order to generate the terrain
+* and apply texture mapping onto each individual block.
+*
+****************************************************************/ 
 package teamtnt;
 
 

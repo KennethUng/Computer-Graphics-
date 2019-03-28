@@ -1,4 +1,14 @@
-
+/***************************************************************
+* file: FPCameraController.java
+* authors: Kenneth L. Ung, Dongri Zhu, Rafael Soto-Salinas
+* class: CS 4450.01 – Computer Graphics
+*
+* assignment: semester project
+* date last modified: 3/28/2019
+*
+* purpose: Code provided by professor, this class is used to generate random terrains.
+*
+****************************************************************/ 
 package teamtnt;
 
  import java.util.Random;

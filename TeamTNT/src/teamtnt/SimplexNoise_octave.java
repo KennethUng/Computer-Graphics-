@@ -1,4 +1,14 @@
-
+/***************************************************************
+* file: SimplexNoise_octave.java
+* authors: Kenneth L. Ung, Dongri Zhu, Rafael Soto-Salinas
+* class: CS 4450.01 – Computer Graphics
+*
+* assignment: semester project
+* date last modified: 3/28/2019
+*
+* purpose: Code provided by professor.
+*
+****************************************************************/ 
 package teamtnt;
 
 import java.awt.Color;
