@@ -14,12 +14,17 @@ package teamtnt;
 ****************************************************************/ 
 
 
+import java.nio.FloatBuffer;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 import static org.lwjgl.opengl.GL11.*;
 import org.lwjgl.util.glu.GLU;
 
 public class SemesterProject {
+    
+    private FloatBuffer lightPosition;
+    private FloatBuffer whiteLight;
     
 //    private FPCameraController fp = new FPCameraController(0,0,0);
     private DisplayMode displayMode;
@@ -53,6 +58,14 @@ public class SemesterProject {
         Display.create();
     }  
     private void initGL() {
+        initLightArrays();
+        glLight(GL_LIGHT0,GL_POSITION,lightPosition);
+        glLight(GL_LIGHT0,GL_SPECULAR,whiteLight);
+        glLight(GL_LIGHT0,GL_DIFFUSE,whiteLight);
+        glLight(GL_LIGHT0,GL_AMBIENT,whiteLight);
+        
+        glEnable(GL_LIGHTING);
+        glEnable(GL_LIGHT0);
          glClearColor(0.0f,0.0f,0.0f,0.0f);
          glEnable(GL_TEXTURE_2D);
          glEnableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -67,6 +80,14 @@ public class SemesterProject {
          glMatrixMode(GL_MODELVIEW);
          glHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_NICEST);
          
+    }
+    
+    private void initLightArrays() {
+        lightPosition = BufferUtils.createFloatBuffer(4);
+        lightPosition.put(0.0f).put(0.0f).put(0.0f).put(1.0f).flip();
+        
+        whiteLight = BufferUtils.createFloatBuffer(4);
+        whiteLight.put(1.0f).put(1.0f).put(1.0f).put(0.0f).flip();
     }
     public static void main(String[] args) {
         SemesterProject dis = new SemesterProject();

@@ -37,7 +37,15 @@ public class Chunk {
     private int StartX, StartY, StartZ;
     
     private Random r;
-    
+    /**
+     * Constructor for Chunk class, takes the starting X,Y, and Z coordinates.
+     * In this constructor, we are loading the image file to apply texture mapping to it. 
+     * We are also generating the blocks, which can contain anywhere from 1-30 blocks in a X,Z plane.
+     * 
+     * @param startX
+     * @param startY
+     * @param startZ 
+     */
     public Chunk(int startX, int startY, int startZ) {
         try {
             texture = TextureLoader.getTexture("PNG",ResourceLoader.getResourceAsStream("terrain.png"));
@@ -50,23 +58,31 @@ public class Chunk {
         for(int i = 0; i < CHUNK_SIZE; i++) {
             for(int j = 0; j < CHUNK_SIZE; j++) {
                 for(int k = 0; k < CHUNK_SIZE; k++) {
-                    if(r.nextFloat() > 0.9f) { 
-                        Blocks[i][j][k] = new Block(Block.BlockType.BlockType_Grass); //Grass
-                    }
-                    else if(r.nextFloat() > 0.7f){
-                        Blocks[i][j][k] = new Block(Block.BlockType.BlockType_Sand); //Sand?
-                    }
-                    else if (r.nextFloat() > 0.5f) {
-                        Blocks[i][j][k] = new Block(Block.BlockType.BlockType_Water); //Water
-                    }
-                    else if(r.nextFloat() > 0.3f) {
-                        Blocks[i][j][k] = new Block(Block.BlockType.BlockType_Stone);
-                    }
-                    else if(r.nextFloat() > 0.1f) {
+                    if(j == 0) {
                         Blocks[i][j][k] = new Block(Block.BlockType.BlockType_Bedrock);
                     }
                     else {
-                        Blocks[i][j][k] = new Block(Block.BlockType.BlockType_Dirt);
+                        if(r.nextFloat() > 0.9f) { 
+                            Blocks[i][j][k] = new Block(Block.BlockType.BlockType_Grass); //Grass
+                        }
+                        else if(r.nextFloat() > 0.8f){
+                            Blocks[i][j][k] = new Block(Block.BlockType.BlockType_Sand); //Sand?
+                        }
+                        else if (r.nextFloat() > 0.7f) {
+                            Blocks[i][j][k] = new Block(Block.BlockType.BlockType_Water); //Water
+                        }
+                        else if(r.nextFloat() > 0.6f) {
+                            Blocks[i][j][k] = new Block(Block.BlockType.BlockType_Stone);
+                        }
+                        else if(r.nextFloat() > 0.5f) {
+                            Blocks[i][j][k] = new Block(Block.BlockType.BlockType_Bedrock);
+                        }
+                        else if(r.nextFloat() > 0.4f) {
+                            Blocks[i][j][k] = new Block(Block.BlockType.BlockType_Wood);
+                        }
+                        else {
+                            Blocks[i][j][k] = new Block(Block.BlockType.BlockType_Dirt);
+                        }
                     }
                 }
             }
@@ -79,6 +95,9 @@ public class Chunk {
         StartZ = startZ;
         rebuildMesh(startX, startY, startZ);
     }
+    /**
+     * Draws onto the screen.
+     */
     public void render() {
         glPushMatrix();
         glPushMatrix();
@@ -92,9 +111,22 @@ public class Chunk {
         glDrawArrays(GL_QUADS, 0, CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE * 24);
         glPopMatrix();
     }
-    
+    /**
+     * Every time there is a change to our Chunks, we need to rebuild the mesh. This method
+     * is responsible for rebuilding the Chunks.
+     * @param startX
+     * @param startY
+     * @param startZ 
+     */
     public void rebuildMesh(float startX, float startY, float startZ) {
-        SimplexNoise generator = new SimplexNoise(30, 0.2f, 10);
+        /**
+         * Simplex Noise requires 3 things : Feature, Persistence (the variation) and a random number generator.
+         * Simplex then generates octaves between 1 and largest feature.
+         * Persistence = closer to 1 = rocky mountains, closer to 0 = varying slopes
+         * Random seed = random number that's it.
+         */
+        //SimplexNoise generator = new SimplexNoise(CHUNK_SIZE,0.2, 3135);
+        float[][] test = calcNoise();
         VBOTextureHandle = glGenBuffers();
         VBOColorHandle = glGenBuffers();
         VBOVertexHandle = glGenBuffers();
@@ -103,14 +135,43 @@ public class Chunk {
         FloatBuffer VertexColorData = BufferUtils.createFloatBuffer(CHUNK_SIZE*CHUNK_SIZE*CHUNK_SIZE*6*12);
         for(float x = 0; x < CHUNK_SIZE; x++) {
             for(float z = 0; z < CHUNK_SIZE; z++) {
-                float y = 0;
-                int ran = r.nextInt(30) + 1;           
-                float noise = (float)generator.getNoise(((int)x), ran, (int)z);
-                if(noise < 0){
-                    noise = noise * -1;
+//                float noise = (float)generator.getNoise(((int)x), 0, (int)z); // Should return a value between -1 and 1
+//                if(noise < 0){
+//                    noise = noise * -1; //This just mean the height is negative.
+//                }
+//                float height = noise * 100 * CUBE_LENGTH; //Should never exceed Chunk_Size
+//                
+//                System.out.println(height);
+//                if(height > 29) {
+//                    height = 29;
+//                }
+                float height = test[(int)x][(int)z] * 30;
+                System.out.println(height);
+                if(height < 0) {
+                    height *= -1;
                 }
-                float height = (float) (startY + (int)(CHUNK_SIZE *noise));             
-                for( ; y <= height; y++) {
+                if(height > 30) {
+                    height = 29;
+                }
+                for(float y = 0 ; y <= height; y++) {
+                    int choice = r.nextInt(3);
+                    if((( y > 1 && y + 1 > height) || y == height) && (height != 0)) {
+                        if(choice == 0)
+                            Blocks[(int)x][(int)y][(int)z] = new Block(Block.BlockType.BlockType_Grass);
+                        else if(choice == 1)
+                            Blocks[(int)x][(int)y][(int)z] = new Block(Block.BlockType.BlockType_Sand);
+                        else
+                            Blocks[(int)x][(int)y][(int)z] = new Block(Block.BlockType.BlockType_Water);
+
+       
+                    }
+                    else if(y != 0) {
+                        choice = r.nextInt(2);
+                        if(choice == 0)
+                            Blocks[(int)x][(int)y][(int)z] = new Block(Block.BlockType.BlockType_Dirt);
+                        else
+                            Blocks[(int)x][(int)y][(int)z] = new Block(Block.BlockType.BlockType_Stone);                     
+                    }
                     VertexTextureData.put(createTexCube((float) 0, (float) 0, Blocks[(int)x][(int)y][(int)z]));
                     VertexPositionData.put(createCube((float)(startX + x * CUBE_LENGTH), (float)(y * CUBE_LENGTH + ((int)(CHUNK_SIZE*.8))), (float) (startZ + z * CUBE_LENGTH)));
                     VertexColorData.put(createCubeVertexCol(getCubeColor(Blocks[(int) x][(int) y][(int) z]))); 
@@ -129,6 +190,24 @@ public class Chunk {
         glBindBuffer(GL_ARRAY_BUFFER, VBOColorHandle);
         glBufferData(GL_ARRAY_BUFFER, VertexColorData, GL_STATIC_DRAW);
         glBindBuffer(GL_ARRAY_BUFFER,0);    
+    }
+    
+    private float[][] calcNoise() {
+        Random rd = new Random();
+        SimplexNoise_octave noise = new SimplexNoise_octave(rd.nextInt(5000));
+        float[][] answer = new float[CHUNK_SIZE][CHUNK_SIZE];
+        float layerF = 0.009f;
+        float weight = .5f;
+        for(int i = 0; i < 3; i++) {
+            for(int x = 0; x < CHUNK_SIZE; x++) {
+                for(int y = 0; y < CHUNK_SIZE; y++) {
+                    answer[x][y] += (float)noise.noise(x * layerF, y * layerF) * weight;
+                }
+            }
+            layerF *= 3.5f;
+            weight *= .5f;
+        }
+        return answer;
     }
     private float[] createCubeVertexCol(float[] CubeColorArray) {
         float[] cubeColors = new float[CubeColorArray.length * 4 * 6];
@@ -177,7 +256,13 @@ public class Chunk {
     private float[] getCubeColor(Block block) {
         return new float[] {1,1,1};
     }
-    
+    /**
+     * Texture Mapping portion, where we are mapping each Block Type to a texture.
+     * @param x
+     * @param y
+     * @param block
+     * @return 
+     */
     public static float[] createTexCube(float x, float y, Block block) {
         float offset = (1024f/16)/1024f;
         switch(block.GetID()) { //Remember Camera is flipped.
@@ -406,7 +491,45 @@ public class Chunk {
                     x + (offset * 2), y + (offset * 1),
                     x + (offset * 2), y + (offset * 2),
                     x + (offset * 1), y + (offset * 2)
-                };                      
+                }; 
+            case 6: //Wood
+                 return new float[] {
+                    // Bottom --> Order goes Right, Left, Left, Right, Lowest --> Highest
+                    x + (offset * 5), y + (offset * 1),
+                    x + (offset * 5), y + (offset * 2),
+                    x + (offset * 4), y + (offset * 1),
+                    x + (offset * 4), y + (offset * 2),
+                    
+                    //Top
+                    x + (offset * 5), y + (offset * 1),
+                    x + (offset * 5), y + (offset * 2),
+                    x + (offset * 4), y + (offset * 1),
+                    x + (offset * 4), y + (offset * 2),
+                    
+                    // Front , now working left to right, lowest to highest
+                    x + (offset * 4), y + (offset * 1),
+                    x + (offset * 5), y + (offset * 1),
+                    x + (offset * 5), y + (offset * 2),
+                    x + (offset * 4), y + (offset * 2),
+                    
+                    // Back , Same concept as Bottom and Top
+                    x + (offset * 5), y + (offset * 2),
+                    x + (offset * 4), y + (offset * 2),
+                    x + (offset * 4), y + (offset * 1),
+                    x + (offset * 5), y + (offset * 1), 
+                    
+                    //Left Back to concept of Front
+                    x + (offset * 4), y + (offset * 1),
+                    x + (offset * 5), y + (offset * 1),
+                    x + (offset * 5), y + (offset * 2),
+                    x + (offset * 4), y + (offset * 2),
+                    
+                    //Right same concept
+                    x + (offset * 4), y + (offset * 1),
+                    x + (offset * 5), y + (offset * 1),
+                    x + (offset * 5), y + (offset * 2),
+                    x + (offset * 4), y + (offset * 2)
+                };                  
                 
         }
         return new float[] {1,1,1};
