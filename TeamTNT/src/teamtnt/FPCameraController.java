@@ -101,8 +101,8 @@ public class FPCameraController {
     // purpose: applies methods above and calls rendering
     // also adds keyboard inputs available
     public void gameLoop() {
-        Chunk test = new Chunk(0,0,0);
-        FPCameraController camera = new FPCameraController(0,0,-30);
+        Chunk test = new Chunk(0,0,0);     
+        FPCameraController camera = new FPCameraController(-15,-15,-75);
         float dx = 0;
         float dy = 0;
         float dt = 0;
@@ -113,6 +113,9 @@ public class FPCameraController {
         Mouse.setGrabbed(true);
         glEnable(GL_DEPTH_TEST); // to not make sides transparent
         while(!Display.isCloseRequested() && !Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)){
+           if(Keyboard.isKeyDown(Keyboard.KEY_0)) {
+               test.splitTerrain(0, 0, 0);
+               while(!Display.isCloseRequested() && !Keyboard.isKeyDown(Keyboard.KEY_ESCAPE) && !Keyboard.isKeyDown(Keyboard.KEY_1)) {
             time = Sys.getTime();
             lastTime = time;
             
@@ -120,7 +123,42 @@ public class FPCameraController {
             dy = Mouse.getDY();
             camera.yaw(dx * mouseSensitivity);
             camera.pitch(dy * mouseSensitivity);
+            if(Keyboard.isKeyDown(Keyboard.KEY_W) || Keyboard.isKeyDown(Keyboard.KEY_UP)){
+                camera.walkForward(movementSpeed);
+            }
+            if(Keyboard.isKeyDown(Keyboard.KEY_S) || Keyboard.isKeyDown(Keyboard.KEY_DOWN)){
+                camera.walkBackwards(movementSpeed);
+            }
+            if(Keyboard.isKeyDown(Keyboard.KEY_A) || Keyboard.isKeyDown(Keyboard.KEY_LEFT)){
+                camera.strafeLeft(movementSpeed);
+            }
+            if(Keyboard.isKeyDown(Keyboard.KEY_D) || Keyboard.isKeyDown(Keyboard.KEY_RIGHT)){
+                camera.strafeRight(movementSpeed);
+            }
+            if(Keyboard.isKeyDown(Keyboard.KEY_SPACE)){
+                camera.moveUp(movementSpeed);
+            }
+            if(Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)){
+                camera.moveDown(movementSpeed);
+            }
+            glLoadIdentity();
+            camera.lookThrough();
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            test.render();
+            //render();
             
+            Display.update();
+            Display.sync(60);                   
+               }
+               Display.update();
+           }
+            time = Sys.getTime();
+            lastTime = time;
+            
+            dx = Mouse.getDX();
+            dy = Mouse.getDY();
+            camera.yaw(dx * mouseSensitivity);
+            camera.pitch(dy * mouseSensitivity);
             if(Keyboard.isKeyDown(Keyboard.KEY_W) || Keyboard.isKeyDown(Keyboard.KEY_UP)){
                 camera.walkForward(movementSpeed);
             }

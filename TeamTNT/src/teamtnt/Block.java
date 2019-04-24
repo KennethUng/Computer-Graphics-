@@ -46,7 +46,9 @@ public class Block {
             BlockID = i;
         }
     }
-    
+    public Block() {
+        
+    }
     public Block(BlockType type) {
         this.Type = type;
     }
@@ -61,11 +63,16 @@ public class Block {
         return this.isActive;
     }
     
-    public void SetActive(boolean active) {
+    public void setActive(boolean active) {
         this.isActive = active;
     }
     
-    public int GetID() {
+    public int getID() {
         return Type.GetID();
     }
+    
+    public void setType(int type) {
+        Type.setID(type);
+    }
+    
 }
