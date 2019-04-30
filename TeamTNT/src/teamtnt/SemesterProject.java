@@ -26,11 +26,10 @@ public class SemesterProject {
     private FloatBuffer lightPosition;
     private FloatBuffer whiteLight;
     
-//    private FPCameraController fp = new FPCameraController(0,0,0);
     private DisplayMode displayMode;
     
     public void start(){
-        FPCameraController fp = new FPCameraController(0,0,0);
+        FPCameraController fp = new FPCameraController(0.0f,0.0f,0.0f);
         
         try{
             createWindow();
@@ -54,7 +53,7 @@ public class SemesterProject {
             }
         }
         Display.setDisplayMode(displayMode);
-        Display.setTitle("final program  - checkpoint 1");
+        Display.setTitle("TeamTNT");
         Display.create();
     }  
     private void initGL() {
@@ -66,7 +65,7 @@ public class SemesterProject {
         
         glEnable(GL_LIGHTING);
         glEnable(GL_LIGHT0);
-         glClearColor(0.0f,0.0f,0.0f,0.0f);
+         glClearColor(0.0f,255.0f,255.0f,100.0f);
          glEnable(GL_TEXTURE_2D);
          glEnableClientState(GL_TEXTURE_COORD_ARRAY);
          glEnableClientState(GL_VERTEX_ARRAY);
@@ -75,7 +74,7 @@ public class SemesterProject {
          glMatrixMode(GL_PROJECTION);
          glLoadIdentity();
          
-         GLU.gluPerspective(100, (float)displayMode.getWidth()/
+         GLU.gluPerspective(100.0f, (float)displayMode.getWidth()/
                  (float)displayMode.getHeight(), 0.1f, 300);
          glMatrixMode(GL_MODELVIEW);
          glHint(GL_PERSPECTIVE_CORRECTION_HINT,GL_NICEST);
