@@ -4,7 +4,7 @@
 * class: CS 4450.01 – Computer Graphics
 *
 * assignment: semester project
-* date last modified: 3/28/2019
+* date last modified: 4/30/2019
 *
 * purpose: Holds the definition of what a Block is. It enumerates the block into different types.
 * We currently are using only 6 basic types. Will be expanded to add more.
@@ -35,7 +35,15 @@ public class Block {
         Stone(4), 
         Bedrock(5),
         Wood(6), 
-        Glass(7);
+        Glass(7),
+        Blue(8),
+        Lines(9), 
+        WhiteLines(10), 
+        Bricks(11),
+        OldBricks(12), 
+        altar(13), 
+        TreeFace(14), 
+        TNT(15);
         
         private int BlockID;
         
