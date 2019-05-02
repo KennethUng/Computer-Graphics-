@@ -148,7 +148,7 @@ public class Chunk {
                     start[1] = (int) height;
                     start[2] = (int)z;
                 }
-                heights[(int)x][(int)z] = (int)height;                
+//                heights[(int)x][(int)z] = (int)height;                
                 //for(float y = 0 ; y <= height; y++) {
                 for(float y = 0; y <= heightOfTerrain[count]; y++) {
                     int choice = r.nextInt(3);
@@ -194,6 +194,7 @@ public class Chunk {
                     VertexPositionData.put(createCube((float)(startX + x * CUBE_LENGTH), (float)(y * CUBE_LENGTH + ((int)(CHUNK_SIZE*.8))), (float) (startZ + z * CUBE_LENGTH)));
                     VertexColorData.put(createCubeVertexCol(getCubeColor(Blocks[(int) x][(int) y][(int) z]))); 
                 }
+                heights[(int)x][(int)z] = (int)heightOfTerrain[count];                
                 count++;
                 heightAtXZ[(int)x][(int)z] = height;
             }

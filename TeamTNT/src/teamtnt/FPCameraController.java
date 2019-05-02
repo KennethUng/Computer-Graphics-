@@ -44,6 +44,14 @@ public class FPCameraController {
     private int minX = 0;
     private int minZ = 0;
     private boolean dynamic = false;
+    private int blockHeights[][];
+    private float mouseSensitivity = 0.09f;
+    private float movementSpeed = .35f;  
+    private float dx = 0;
+    private float dy = 0;
+    private float dt = 0;
+    private float lastTime = 0;
+    private long time = 0;    
     /**
      * Constructor for a Camera Controller, we set the position of the Camera at the X,Y,Z location.
      * @param x starting X
@@ -61,6 +69,9 @@ public class FPCameraController {
     // purpose: increments the camera's yaw rotation
     public void yaw(float amount){
         yaw += amount;
+    }
+    private void setDynamic(boolean dynamic) {
+        this.dynamic = dynamic;
     }
     // method: pitch
     // purpose: increments the camera's pitch rotation
@@ -135,20 +146,13 @@ public class FPCameraController {
     // We have also binded the keys F1-F5, to change the terrain to different textures.
     // Finally we made the world dynamically generated as soon as you pass a certain X or Z value.
     public void gameLoop() {
-        world = new Chunk(0,0,0,0); //Default
+        world = new Chunk(0,0,0,10); //Default
         test = new Chunk(0,0,0,10); //Default
         gameWorld.add(world);
         int[] playerPosition = world.getStart(); //Used later to set the User to the highest point on the terrain.
         FPCameraController camera = new FPCameraController(-30f,-100f,-30f);
         //FPCameraController camera = new FPCameraController(-playerPosition[0] * 2,-playerPosition[1] * world.CUBE_LENGTH - (world.CHUNK_SIZE - 3.5f),-playerPosition[2] * world.CUBE_LENGTH);
         camera.world = world;
-        float dx = 0;
-        float dy = 0;
-        float dt = 0;
-        float lastTime = 0;
-        long time = 0;
-        float mouseSensitivity = 0.09f;
-        float movementSpeed = .35f;
         Mouse.setGrabbed(true);
         glEnable(GL_DEPTH_TEST); // to not make sides transparent
         while(!Display.isCloseRequested() && !Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)){
@@ -159,6 +163,11 @@ public class FPCameraController {
             dy = Mouse.getDY();
             camera.yaw(dx * mouseSensitivity);
             camera.pitch(dy * mouseSensitivity);
+            if(Keyboard.isKeyDown(Keyboard.KEY_M)) {
+                System.out.println("Dynamic Mode on");
+                dynamic = dynamic != true;
+                camera.dynamic = camera.dynamic != true;
+            }
             if(Keyboard.isKeyDown(Keyboard.KEY_W) || Keyboard.isKeyDown(Keyboard.KEY_UP)){
                 camera.walkForward(movementSpeed);
             }
@@ -185,11 +194,13 @@ public class FPCameraController {
             if(Keyboard.isKeyDown(Keyboard.KEY_F2)){
                 for(int i = 0; i < gameWorld.size(); i++) {
                     gameWorld.get(i).rebuildMesh(0, 0, 0, 5);
-                }            }
+                }            
+            }
             if(Keyboard.isKeyDown(Keyboard.KEY_F3)){
                 for(int i = 0; i < gameWorld.size(); i++) {
                     gameWorld.get(i).rebuildMesh(0, 0, 0, 6);
-                }            }
+                }            
+            }
             if(Keyboard.isKeyDown(Keyboard.KEY_F4)){
                 for(int i = 0; i < gameWorld.size(); i++) {
                     gameWorld.get(i).rebuildMesh(0, 0, 0, 7);
@@ -208,13 +219,19 @@ public class FPCameraController {
                 }  
             }
 	    if(Keyboard.isKeyDown(Keyboard.KEY_E)) {
-	        //camera = new FPCameraController(0,-86,0);
-	        camera = new FPCameraController(-20,-86,-30);
-	        test.collisionDetection(0, 0, 0);
-	        int blockHeights[][] = test.getHeights1();
+                dynamic = false;
+                test.collisionDetection(0, 0, 0);
+                blockHeights = test.getHeights1();
+                
+                
+                //System.out.println("Current Chunk: " + currentChunk());  
+                //blockHeights = gameWorld.get(currentChunk()).getHeights1();
+                camera = new FPCameraController(-20,-86,-30);	        
 	        	   
 	        	   
                 while(!Display.isCloseRequested() && !Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {
+
+                    //blockHeights = gameWorld.get(currentChunk()).getHeights1();
 		   	           
                     time = Sys.getTime();
 		   
@@ -230,28 +247,31 @@ public class FPCameraController {
                     camera.pitch(dy * mouseSensitivity);
 		   
                     
-		   
+            if(Keyboard.isKeyDown(Keyboard.KEY_M)) {
+                normalWorld(camera);
+               
+            }		   
                     if(Keyboard.isKeyDown(Keyboard.KEY_W) || Keyboard.isKeyDown(Keyboard.KEY_UP)){
 		   
-                        camera.collisionWalkForward(movementSpeed, blockHeights);
+                        camera.collisionWalkForward(movementSpeed, blockHeights, camera);
 		   	
                     }
 		   
                     if(Keyboard.isKeyDown(Keyboard.KEY_S) || Keyboard.isKeyDown(Keyboard.KEY_DOWN)){
 		  
-                        camera.collisionWalkBackwards(movementSpeed, blockHeights);
+                        camera.collisionWalkBackwards(movementSpeed, blockHeights, camera);
 
                     }
 		   
                     if(Keyboard.isKeyDown(Keyboard.KEY_A) || Keyboard.isKeyDown(Keyboard.KEY_LEFT)){
 		   
-                        camera.collisionStrafeLeft(movementSpeed, blockHeights);
+                        camera.collisionStrafeLeft(movementSpeed, blockHeights, camera);
 		   	
                     }
 		   
                     if(Keyboard.isKeyDown(Keyboard.KEY_D) || Keyboard.isKeyDown(Keyboard.KEY_RIGHT)){
 		   
-                        camera.collisionStrafeRight(movementSpeed, blockHeights);
+                        camera.collisionStrafeRight(movementSpeed, blockHeights, camera);
 		   	
                     }
 		   
@@ -259,41 +279,79 @@ public class FPCameraController {
 		   
                         float powerJump = 0.8f;
 		   	
-                        camera.collisionJump(powerJump);
+                        camera.collisionJump(powerJump, camera);
 
                     }
 		   
                     if(Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)){
 		   
-                        camera.collisionMoveDown(movementSpeed, blockHeights);
+                        camera.collisionMoveDown(movementSpeed, blockHeights, camera);
 		   	
                     }
+//            if(dynamic) {
+//                System.out.println("This is true");
+//                checkEndOfWorld(camera);
+//                setMinandMax(camera);                
+//            }
+//            else {
+//                System.out.println("This is false");
+//            }    
+                       
             if(Keyboard.isKeyDown(Keyboard.KEY_F1)){
+//                gameWorld.get(currentChunk()).rebuildMesh(0, 0, 0, 0);
+//                blockHeights = gameWorld.get(currentChunk()).getHeights1();
                 test.rebuildMesh(0, 0, 0, 0);
+                blockHeights = test.getHeights1();
+                    
+
             }
             if(Keyboard.isKeyDown(Keyboard.KEY_F2)){
+//                gameWorld.get(currentChunk()).rebuildMesh(0, 0, 0, 5);
+//                blockHeights = gameWorld.get(currentChunk()).getHeights1();                
                 test.rebuildMesh(0,0,0,5);
+                blockHeights = test.getHeights1();
+
             }
             if(Keyboard.isKeyDown(Keyboard.KEY_F3)){
+//                gameWorld.get(currentChunk()).rebuildMesh(0, 0, 0, 6);
+//                blockHeights = gameWorld.get(currentChunk()).getHeights1();                
                 test.rebuildMesh(0, 0, 0, 6);
+                blockHeights = test.getHeights1();
+
             }
             if(Keyboard.isKeyDown(Keyboard.KEY_F4)){
+//                gameWorld.get(currentChunk()).rebuildMesh(0, 0, 0, 7);
+//                blockHeights = gameWorld.get(currentChunk()).getHeights1();                
                 test.rebuildMesh(0, 0, 0, 7);
+                blockHeights = test.getHeights1();
+
             }
             if(Keyboard.isKeyDown(Keyboard.KEY_F5)){
+//                gameWorld.get(currentChunk()).rebuildMesh(0, 0, 0, 8);
+//                blockHeights = gameWorld.get(currentChunk()).getHeights1();                
                 test.rebuildMesh(0, 0, 0, 8);
+                blockHeights = test.getHeights1();
+
             }            
             if(Keyboard.isKeyDown(Keyboard.KEY_F6)){
+//                gameWorld.get(currentChunk()).rebuildMesh(0, 0, 0, 9);
+//                blockHeights = gameWorld.get(currentChunk()).getHeights1();                
                 test.rebuildMesh(0, 0, 0, 9);
+                blockHeights = test.getHeights1();
+
             }            
             if(Keyboard.isKeyDown(Keyboard.KEY_F7)){
+//                gameWorld.get(currentChunk()).rebuildMesh(0, 0, 0, 10);
+//                blockHeights = gameWorld.get(currentChunk()).getHeights1();                
                 test.rebuildMesh(0, 0, 0, 10);
+                blockHeights = test.getHeights1();
+
             }                      
 		   	            
 		    //Gravity
 		   
                                  
-                    camera.gravity(movementSpeed, blockHeights);
+                    camera.gravity(movementSpeed, blockHeights,camera);
 		   	            
 		   
                     glLoadIdentity();
@@ -303,7 +361,12 @@ public class FPCameraController {
                     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		   
                     test.render();
-		   	            
+//                    for(int i = 0; i < gameWorld.size(); i++) {
+//                        gameWorld.get(i).render();
+//                    }
+
+                    //setMinandMax(camera);
+		   	             
 		   
                     Display.update();
 		   
@@ -313,16 +376,15 @@ public class FPCameraController {
 	        
                 Display.destroy();
 		
-            }            
+            }      
+
             glLoadIdentity();
             camera.lookThrough();
-            //test.render();
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             for(int i = 0; i < gameWorld.size(); i++) {
                 gameWorld.get(i).render();
             }
-            checkEndOfWorld(camera);
-            setMinandMax(camera);
+          
             System.out.println("Camera Position X: " + camera.position.x + "\nCamera Position Z: " + camera.position.z);
             System.out.println("Current MaxX: " + maxX + "\nCurrent MinX: " + minX + 
                     "\nCurrent MaxZ: " + maxZ + "\nCurrent MinZ: " + minZ);
@@ -504,101 +566,112 @@ public class FPCameraController {
      * @param blockHeights 
      */
 
-	public void collisionWalkForward(float distance, int[][] blockHeights){
+	public void collisionWalkForward(float distance, int[][] blockHeights, FPCameraController camera){
         float xOffset = distance *(float) Math.sin(Math.toRadians(yaw));
         float zOffset = distance *(float) Math.cos(Math.toRadians(yaw));
         position.x -= xOffset;
         position.z += zOffset;
         
         // wall collision detection
-        wallCollisionDetection(blockHeights);
         
         // can not pass the edges of the world
-        cannotPassEdges();
+        if(!dynamic) {
+            wallCollisionDetection(blockHeights,camera);
+            cannotPassEdges(camera);
+        }
     }
 
         // Movement for collision
-    public void collisionWalkBackwards(float distance, int[][] blockHeights){
+    public void collisionWalkBackwards(float distance, int[][] blockHeights, FPCameraController camera){
         float xOffset = distance *(float) Math.sin(Math.toRadians(yaw));
         float zOffset = distance *(float) Math.cos(Math.toRadians(yaw));
-        position.x += xOffset;
-        position.z -= zOffset;   
+        camera.position.x += xOffset;
+        camera.position.z -= zOffset;   
         
         // wall collision detection
-        wallCollisionDetection(blockHeights);
+//        wallCollisionDetection(blockHeights, camera);
         
     	// can not pass the edges of the world
-        cannotPassEdges();
+        if(!dynamic) {
+            wallCollisionDetection(blockHeights,camera);
+            cannotPassEdges(camera);
+        }
     }
 
     // MOvement for collision.
-    public void collisionStrafeLeft(float distance, int[][] blockHeights){
+    public void collisionStrafeLeft(float distance, int[][] blockHeights,FPCameraController camera ){
         float xOffset = distance *(float) Math.sin(Math.toRadians(yaw - 90));
         float zOffset = distance *(float) Math.cos(Math.toRadians(yaw - 90));
         position.x -= xOffset;
         position.z += zOffset; 
         
         // wall collision detection
-        wallCollisionDetection(blockHeights);
+        //wallCollisionDetection(blockHeights, camera);
         
         // can not pass the edges of the world
-        cannotPassEdges();
+        if(!dynamic) {
+            wallCollisionDetection(blockHeights,camera);
+            cannotPassEdges(camera);
+        }
     }
 
     // Movement for Collision
-    public void collisionStrafeRight(float distance, int[][] blockHeights){
+    public void collisionStrafeRight(float distance, int[][] blockHeights, FPCameraController camera){
         float xOffset = distance *(float) Math.sin(Math.toRadians(yaw + 90));
         float zOffset = distance *(float) Math.cos(Math.toRadians(yaw + 90));
-        position.x -= xOffset;
-        position.z += zOffset;
+        camera.position.x -= xOffset;
+        camera.position.z += zOffset;
         
         // wall collision detection
-        wallCollisionDetection(blockHeights);
+        //wallCollisionDetection(blockHeights, camera);
     
         // can not pass the edges of the world
-        cannotPassEdges();
+        if(!dynamic) {
+            wallCollisionDetection(blockHeights,camera);
+            cannotPassEdges(camera);
+        }
     }
     
     /**
      * Checks to see if the next Block is a wall or not.
      * @param blockHeights 
      */
-	private void wallCollisionDetection(int[][] blockHeights) {
-		
-		int leftBlockHeight=-90, rightBlockHeight=-90, frontBlockHeight=-90, backBlockHeight=-90;
+	private void wallCollisionDetection(int[][] blockHeights, FPCameraController camera) {
+	
+        int leftBlockHeight=-90, rightBlockHeight=-90, frontBlockHeight=-90, backBlockHeight=-90;
 
-        if(position.x > -57)
-        	leftBlockHeight = getBlockHeight(position.x-2, position.z, blockHeights);
-        if(position.x < -1)
-        	rightBlockHeight = getBlockHeight(position.x+2, position.z, blockHeights);
-        if(position.z > -56)
-        	frontBlockHeight = getBlockHeight(position.x, position.z-2, blockHeights);
-        if(position.z < 0)
-        	backBlockHeight = getBlockHeight(position.x, position.z+2, blockHeights);
+        if(camera.position.x > -57)
+        	leftBlockHeight = getBlockHeight(position.x-2, position.z, blockHeights, camera);
+        if(camera.position.x < -1)
+        	rightBlockHeight = getBlockHeight(position.x+2, position.z, blockHeights, camera);
+        if(camera.position.z > -56)
+        	frontBlockHeight = getBlockHeight(position.x, position.z-2, blockHeights, camera);
+        if(camera.position.z < 0)
+        	backBlockHeight = getBlockHeight(position.x, position.z+2, blockHeights, camera);
         
         
-        int midPointX = Math.round(position.x/2)*2;
+        int midPointX = Math.round(camera.position.x/2)*2;
         
-        if(position.y > leftBlockHeight) {
-        	if(position.x < midPointX-0.5f)
-        		position.x = midPointX-0.5f;
+        if(camera.position.y > leftBlockHeight) {
+        	if(camera.position.x < midPointX-0.5f)
+        		camera.position.x = midPointX-0.5f;
         }
         
-        if(position.y > rightBlockHeight) {
-        	if(position.x > midPointX-0.5f)
-        		position.x = midPointX-0.5f;
+        if(camera.position.y > rightBlockHeight) {
+        	if(camera.position.x > midPointX-0.5f)
+        		camera.position.x = midPointX-0.5f;
         }
         
-        int midPointZ = Math.round((position.z-1)/2)*2 + 1;
+        int midPointZ = Math.round((camera.position.z-1)/2)*2 + 1;
         
-        if(position.y > frontBlockHeight) {
-        	if(position.z < midPointZ-0.5f)
-        		position.z = midPointZ-0.5f;
+        if(camera.position.y > frontBlockHeight) {
+        	if(camera.position.z < midPointZ-0.5f)
+        		camera.position.z = midPointZ-0.5f;
         }
         
-        if(position.y > backBlockHeight) {
-        	if(position.z > midPointZ-0.5f)
-        		position.z = midPointZ-0.5f;
+        if(camera.position.y > backBlockHeight) {
+        	if(camera.position.z > midPointZ-0.5f)
+        		camera.position.z = midPointZ-0.5f;
         }
 		
 	}
@@ -606,27 +679,27 @@ public class FPCameraController {
         /**
          * calculating Jumping
          * */
-    public void collisionJump(float distance){
-        position.y -= distance;
+    public void collisionJump(float distance, FPCameraController camera){
+        camera.position.y -= distance;
         
         // can not pass the edges of the world
-        if (position.y < -90)
-        	position.y = -90;
+        if (camera.position.y < -90)
+        	camera.position.y = -90;
     }
     /**
      * movement for collision.
      * @param distance
      * @param blockHeights 
      */
-    private void collisionMoveDown(float distance, int[][] blockHeights){
-    	position.y += distance;
+    private void collisionMoveDown(float distance, int[][] blockHeights, FPCameraController camera){
+    	camera.position.y += distance;
     	
 
-    	int blockHeight = getBlockHeight(position.x, position.z, blockHeights);
+    	int blockHeight = getBlockHeight(camera.position.x, camera.position.z, blockHeights, camera);
 
         
-        if (position.y > blockHeight)
-        	position.y = blockHeight;
+        if (camera.position.y > blockHeight)
+        	camera.position.y = blockHeight;
     }
     
     /**
@@ -634,14 +707,14 @@ public class FPCameraController {
      * @param distance
      * @param blockHeights 
      */
-    private void gravity(float distance, int[][] blockHeights) {
+    private void gravity(float distance, int[][] blockHeights, FPCameraController camera) {
     	float gravity = 1.15f;
-    	position.y += distance*gravity;
+    	camera.position.y += distance*gravity;
     	
     	// collision detection
-    	int blockHeight = getBlockHeight(position.x, position.z, blockHeights);     
-        if (position.y > blockHeight)
-        	position.y = blockHeight;
+    	int blockHeight = getBlockHeight(camera.position.x, camera.position.z, blockHeights, camera);     
+        if (camera.position.y > blockHeight)
+        	camera.position.y = blockHeight;
 		
 	}
    /**
@@ -651,19 +724,19 @@ public class FPCameraController {
     * @param blockHeights
     * @return 
     */
-    private int getBlockHeight(float x, float z, int[][] blockHeights) {
+    private int getBlockHeight(float x, float z, int[][] blockHeights, FPCameraController camera) {
     	int blockX = 0, blockZ = 0;
     	
     	// our chunks in the X-axis are from 1 to -59
     	// 1,0 are stored in int[0][] blockHeights, -1,-2 are stored in int[1][], and so on, since each block size is 2
     	// 2 is the cube size
-    	if(position.x < 0)
+    	if(camera.position.x < 0)
     		blockX = Math.round(Math.round(x)/(-2));
     	
     	// our chunks in the Z-axis are from 2 to -58
     	// 2,1 are stored in int[][0] blockHeights, 0,-1 are stored in int[][1], and so on, since each block size is 2
     	// 2 is the cube size
-    	if(position.z < 1)
+    	if(camera.position.z < 1)
     		blockZ = Math.round((Math.round(z)-1)/(-2));
     	
     	// 28 is the height of the camera
@@ -673,16 +746,253 @@ public class FPCameraController {
     /**
      * Makes sure the user cannot pass an edge and bounds them.
      */
-    private void cannotPassEdges() {
-    	if(position.x > 0)
+    private void cannotPassEdges(FPCameraController camera) {
+        System.out.println("running");
+    	if(camera.position.x > 0)
         	position.x = 0;
-        if(position.z > 1)
+        if(camera.position.z > 1)
         	position.z = 1;
-        if(position.x < -58)
+        if(camera.position.x < -58)
         	position.x = -58;
-        if(position.z < -57)
+        if(camera.position.z < -57)
         	position.z = -57;
-	}
+    }
+    private int currentChunk() {
+        for(int i = 0; i < gameWorld.size(); i++) {
+            if(minX == gameWorld.get(i).getX() && minZ == gameWorld.get(i).getZ()) {
+                return i;
+            }
+        }
+        return -1;
+    }
+    
+    private void normalWorld(FPCameraController camera) {
+        while(!Display.isCloseRequested() && !Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)){
+            time = Sys.getTime();
+            lastTime = time;
+            
+            dx = Mouse.getDX();
+            dy = Mouse.getDY();
+            camera.yaw(dx * mouseSensitivity);
+            camera.pitch(dy * mouseSensitivity);
+            if(Keyboard.isKeyDown(Keyboard.KEY_M)) {
+                dynamic = dynamic != true;
+                camera.dynamic = camera.dynamic != true;
+            }
+            if(Keyboard.isKeyDown(Keyboard.KEY_W) || Keyboard.isKeyDown(Keyboard.KEY_UP)){
+                camera.walkForward(movementSpeed);
+            }
+            if(Keyboard.isKeyDown(Keyboard.KEY_S) || Keyboard.isKeyDown(Keyboard.KEY_DOWN)){
+                camera.walkBackwards(movementSpeed);
+            }
+            if(Keyboard.isKeyDown(Keyboard.KEY_A) || Keyboard.isKeyDown(Keyboard.KEY_LEFT)){
+                camera.strafeLeft(movementSpeed);
+            }
+            if(Keyboard.isKeyDown(Keyboard.KEY_D) || Keyboard.isKeyDown(Keyboard.KEY_RIGHT)){
+                camera.strafeRight(movementSpeed);
+            }
+            if(Keyboard.isKeyDown(Keyboard.KEY_SPACE)){
+                camera.moveUp(movementSpeed);
+            }
+            if(Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)){
+                camera.moveDown(movementSpeed);
+            }
+            if(Keyboard.isKeyDown(Keyboard.KEY_F1)){
+                for(int i = 0; i < gameWorld.size(); i++) {
+                    gameWorld.get(i).rebuildMesh(0, 0, 0, 0);
+                }
+            }
+            if(Keyboard.isKeyDown(Keyboard.KEY_F2)){
+                for(int i = 0; i < gameWorld.size(); i++) {
+                    gameWorld.get(i).rebuildMesh(0, 0, 0, 5);
+                }            
+            }
+            if(Keyboard.isKeyDown(Keyboard.KEY_F3)){
+                for(int i = 0; i < gameWorld.size(); i++) {
+                    gameWorld.get(i).rebuildMesh(0, 0, 0, 6);
+                }            }
+            if(Keyboard.isKeyDown(Keyboard.KEY_F4)){
+                for(int i = 0; i < gameWorld.size(); i++) {
+                    gameWorld.get(i).rebuildMesh(0, 0, 0, 7);
+                }            }
+            if(Keyboard.isKeyDown(Keyboard.KEY_F5)){
+                for(int i = 0; i < gameWorld.size(); i++) {
+                    gameWorld.get(i).rebuildMesh(0, 0, 0, 8);
+                }            }            
+            if(Keyboard.isKeyDown(Keyboard.KEY_F6)){
+                for(int i = 0; i < gameWorld.size(); i++) {
+                    gameWorld.get(i).rebuildMesh(0, 0, 0, 9);
+                }            }            
+            if(Keyboard.isKeyDown(Keyboard.KEY_F7)){
+                for(int i = 0; i < gameWorld.size(); i++) {
+                    gameWorld.get(i).rebuildMesh(0, 0, 0, 10);
+                }  
+            }
+	    if(Keyboard.isKeyDown(Keyboard.KEY_E)) {
+                System.out.println("Current Chunk: " + currentChunk());  
+                blockHeights = gameWorld.get(currentChunk()).getHeights1();
+                camera = new FPCameraController(-20,-86,-30);	        
+	        	   
+	        	   
+                while(!Display.isCloseRequested() && !Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)) {
+                    System.out.println("Current Chunk: " + currentChunk());  
+                    
+                    blockHeights = gameWorld.get(currentChunk()).getHeights1();
+                    
+		   	           
+                    time = Sys.getTime();
+		   
+                    lastTime = time;
+
+		   
+                    dx = Mouse.getDX();
+		   
+                    dy = Mouse.getDY();
+		   
+                    camera.yaw(dx * mouseSensitivity);
+		   
+                    camera.pitch(dy * mouseSensitivity);
+		   
+                    
+            if(Keyboard.isKeyDown(Keyboard.KEY_M)) {
+                dynamic = dynamic != true;
+                camera.dynamic = camera.dynamic != true;
+               
+            }		   
+                    if(Keyboard.isKeyDown(Keyboard.KEY_W) || Keyboard.isKeyDown(Keyboard.KEY_UP)){
+		   
+                        camera.collisionWalkForward(movementSpeed, blockHeights, camera);
+		   	
+                    }
+		   
+                    if(Keyboard.isKeyDown(Keyboard.KEY_S) || Keyboard.isKeyDown(Keyboard.KEY_DOWN)){
+		  
+                        camera.collisionWalkBackwards(movementSpeed, blockHeights, camera);
+
+                    }
+		   
+                    if(Keyboard.isKeyDown(Keyboard.KEY_A) || Keyboard.isKeyDown(Keyboard.KEY_LEFT)){
+		   
+                        camera.collisionStrafeLeft(movementSpeed, blockHeights, camera);
+		   	
+                    }
+		   
+                    if(Keyboard.isKeyDown(Keyboard.KEY_D) || Keyboard.isKeyDown(Keyboard.KEY_RIGHT)){
+		   
+                        camera.collisionStrafeRight(movementSpeed, blockHeights, camera);
+		   	
+                    }
+		   
+                    if(Keyboard.isKeyDown(Keyboard.KEY_SPACE)){
+		   
+                        float powerJump = 0.8f;
+		   	
+                        camera.collisionJump(powerJump, camera);
+
+                    }
+		   
+                    if(Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)){
+		   
+                        camera.collisionMoveDown(movementSpeed, blockHeights, camera);
+		   	
+                    }
+            if(dynamic) {
+                System.out.println("This is true");
+                checkEndOfWorld(camera);
+                setMinandMax(camera);                
+            }
+            else {
+                System.out.println("This is false");
+            }    
+                       
+            if(Keyboard.isKeyDown(Keyboard.KEY_F1)){
+                test.rebuildMesh(0, 0, 0, 0);
+                blockHeights = test.getHeights1();
+
+            }
+            if(Keyboard.isKeyDown(Keyboard.KEY_F2)){
+                test.rebuildMesh(0,0,0,5);
+                blockHeights = test.getHeights1();
+
+            }
+            if(Keyboard.isKeyDown(Keyboard.KEY_F3)){
+                test.rebuildMesh(0, 0, 0, 6);
+                blockHeights = test.getHeights1();
+
+            }
+            if(Keyboard.isKeyDown(Keyboard.KEY_F4)){
+                test.rebuildMesh(0, 0, 0, 7);
+                blockHeights = test.getHeights1();
+
+            }
+            if(Keyboard.isKeyDown(Keyboard.KEY_F5)){
+                test.rebuildMesh(0, 0, 0, 8);
+                blockHeights = test.getHeights1();
+
+            }            
+            if(Keyboard.isKeyDown(Keyboard.KEY_F6)){
+                test.rebuildMesh(0, 0, 0, 9);
+                blockHeights = test.getHeights1();
+
+            }            
+            if(Keyboard.isKeyDown(Keyboard.KEY_F7)){
+                test.rebuildMesh(0, 0, 0, 10);
+                blockHeights = test.getHeights1();
+
+            }                      
+		   	            
+		    //Gravity
+		   
+                                 
+                    camera.gravity(movementSpeed, blockHeights,camera);
+		   	            
+		   
+                    glLoadIdentity();
+		   
+                    camera.lookThrough();
+		   
+                    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		   
+                    //test.render();
+                    for(int i = 0; i < gameWorld.size(); i++) {
+                        gameWorld.get(i).render();
+                    }
+                    setMinandMax(camera);
+		   	             
+		   
+                    Display.update();
+		   
+                    Display.sync(60);                   
+		
+                }
+	        
+                Display.destroy();
+		
+            }      
+
+            glLoadIdentity();
+            camera.lookThrough();
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            for(int i = 0; i < gameWorld.size(); i++) {
+                gameWorld.get(i).render();
+            }
+            if(dynamic) {
+                System.out.println("This is true");
+                checkEndOfWorld(camera);
+                setMinandMax(camera);                
+            }
+            else {
+                System.out.println("This is false");
+            }            
+            System.out.println("Camera Position X: " + camera.position.x + "\nCamera Position Z: " + camera.position.z);
+            System.out.println("Current MaxX: " + maxX + "\nCurrent MinX: " + minX + 
+                    "\nCurrent MaxZ: " + maxZ + "\nCurrent MinZ: " + minZ);
+            Display.update();
+            Display.sync(60);
+        }
+        Display.destroy();
+        
+    }
     
  
 }
