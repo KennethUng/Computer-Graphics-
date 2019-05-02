@@ -1343,19 +1343,22 @@ public class Chunk {
     public void setBlockType6(float y, float x, float z, float height, int index){
         if( x== 0 || z == 0 || x == CHUNK_SIZE-1 || z == CHUNK_SIZE-1)
             Blocks[(int)x][(int)y][(int)z].setType(11);
-        else if(y == heightOfTerrain[index]){
+        else if(y == (float)heightOfTerrain[index] - 1){
             Blocks[(int)x][(int)y][(int)z].setType(13);
         }
-        else if ( y == 0)
+        else if ( y == 0 )
             Blocks[(int)x][(int)y][(int)z].setType(8);
-        else if(y < 5 )
+        else if(y == 5 )
             Blocks[(int)x][(int)y][(int)z].setType(0);
-
+        else if( y < 5){
+            
+            if (y == height)
+                Blocks[(int)x][(int)y][(int)z].setType(0);
+            else 
+                Blocks[(int)x][(int)y][(int)z].setType(3);
+        }
         else 
             Blocks[(int)x][(int)y][(int)z].setType(12);
-
-        if(x == 15 & z == 15  )
-            Blocks[(int)x][(int)y][(int)z].setType(14);
       
     } 
 }
